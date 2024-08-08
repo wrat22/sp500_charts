@@ -20,6 +20,10 @@ default_args = {
 
 
 def main(ds_nodash):
+    """
+    Main function performed by Airflow. Get tickers from database,
+    downloads data for each ticker, cleans it and save cleaned data to database
+    """
     tickers = get_tickers()
     company_tickers = [str(row[0]) for row in tickers]
     for ticker in company_tickers:
@@ -31,6 +35,9 @@ def main(ds_nodash):
 
 
 def get_tickers():
+    """
+    Get tickers from PostgresSQL database
+    """
     hook = PostgresHook(postgres_conn_id="postgres_localhost")
     try:
         conn = hook.get_conn()
@@ -47,6 +54,9 @@ def get_tickers():
 
 
 def get_ticker_data(ticker, ds_nodash):
+    """
+    Get data for ticker from yfinance
+    """
     try:
         stock = yf.Ticker(ticker)
         close_data = datetime.strptime(ds_nodash, '%Y%m%d')
@@ -60,6 +70,9 @@ def get_ticker_data(ticker, ds_nodash):
 
 
 def clean_data(raw_data, ticker):
+    """
+    Cleans downloaded ticker data
+    """
     try:
         data1 = raw_data.drop(columns=['Stock Splits', 'Dividends'])
         data1['Open'] = data1['Open'].apply(lambda x: round(x, 2))
@@ -86,6 +99,9 @@ def clean_data(raw_data, ticker):
 
 
 def save_data_to_db(data):
+    """
+    Saves data to PostgresSQL database
+    """
     hook = PostgresHook(postgres_conn_id="postgres_localhost")
     try:
         with hook.get_conn() as conn:
