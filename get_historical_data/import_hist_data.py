@@ -6,14 +6,14 @@ from pyspark.sql.functions import to_date, round, lit
 
 def main():
     spark = initialize_spark()
-    DIRECTORY = "data"
-    for filename in os.listdir(DIRECTORY):
-        process_file(filename, spark)
+    DATA_DIRECTORY = "data"
+    for filename in os.listdir(DATA_DIRECTORY):
+        if filename.endswith(".csv"):
+            process_file(filename, spark)
 
 
 def initialize_spark():
-    spark = SparkSession.builder.appName("get_hist_data").getOrCreate()
-    return spark
+    return SparkSession.builder.appName("get_hist_data").getOrCreate()
 
 
 def process_file(filename, spark):
@@ -40,14 +40,23 @@ def clean_data(df, ticker):
 
 def save_to_db(df):
     load_dotenv()
+
     db_name = os.getenv("DBNAME")
     db_user = os.getenv("DBUSER")
     db_password = os.getenv("DBPASSWORD")
     db_server = os.getenv("DBHOST")
     db_port = os.getenv("DBPORT")
     db_table = "stock_prize"
-    URL = f"jdbc:postgresql://{db_server}:{db_port}/{db_name}"
-    df.write.format("jdbc").option("url", URL).option("dbtable", db_table).option("user", db_user).option("password", db_password).mode("append").save()
+
+    if not all([db_name, db_user, db_password, db_server, db_port]):
+        raise ValueError("Database configuration environment variables are missing!")
+
+    JDBC_URL = f"jdbc:postgresql://{db_server}:{db_port}/{db_name}"
+    df.write.format("jdbc").option("url", JDBC_URL)\
+        .option("dbtable", db_table)\
+        .option("user", db_user)\
+        .option("password", db_password)\
+        .mode("append").save()
 
 
 if __name__ == "__main__":
