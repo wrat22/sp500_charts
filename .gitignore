@@ -1,6 +1,8 @@
-.env
+get_historical_data/.env
 .ipynb
 .ipynb_checkpoints
 visualization.py
 src
-airflow_get_data
+airflow_get_data/data
+airflow_get_data/logs
+webpage/.env
