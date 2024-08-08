@@ -5,4 +5,5 @@ visualization.py
 src
 airflow_get_data/data
 airflow_get_data/logs
+airflow_get_data/sp500
 webpage/.env
