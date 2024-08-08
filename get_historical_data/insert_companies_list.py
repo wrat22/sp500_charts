@@ -23,20 +23,28 @@ def get_companies():
 
 def insert_companies(company_list):
     load_dotenv()
+
     db_name = os.getenv("DBNAME")
     db_user = os.getenv("DBUSER")
     db_password = os.getenv("DBPASSWORD")
-    conn = psycopg2.connect(database=db_name, user=db_user, password=db_password)
-    cur = conn.cursor()
-    for company in company_list:
-        cur.execute("""
-            INSERT INTO companies (ticker, name, sector, industry)
-            VALUES (%s, %s, %s, %s)
-            ON CONFLICT (ticker) DO NOTHING;
-        """, (company['Symbol'], company['Security'], company['GICS Sub-Industry'], company['GICS Sector']))
-    conn.commit()
-    cur.close()
-    conn.close()
+
+    if not db_name or not db_user or not db_password:
+        raise ValueError("Database configuration environment variables are missing")
+
+    with psycopg2.connect(database=db_name, user=db_user, password=db_password) as conn:
+        with conn.cursor() as cur:
+            for company in company_list:
+                cur.execute("""
+                    INSERT INTO companies (ticker, name, sector, industry)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (ticker) DO NOTHING;
+                """, (
+                    company['Symbol'],
+                    company['Security'],
+                    company['GICS Sub-Industry'],
+                    company['GICS Sector']
+                ))
+            conn.commit()
 
 
 if __name__ == "__main__":
