@@ -1,0 +1,6 @@
+.env
+.ipynb
+.ipynb_checkpoints
+visualization.py
+src
+airflow_get_data
