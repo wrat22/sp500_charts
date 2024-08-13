@@ -1,5 +1,5 @@
 __pycache__/
-
+/__pycache__/
 get_historical_data/.env
 .ipynb
 .ipynb_checkpoints
