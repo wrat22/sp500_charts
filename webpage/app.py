@@ -44,9 +44,14 @@ def get_stock_data():
         if ticker in pandas_value_df['ticker'].unique():
             data = pandas_value_df[pandas_value_df['ticker'] == ticker]
             pct_change = calculate_pct_change(pandas_value_df, ticker)
+            last_week_value = calculate_last_week(pandas_value_df, ticker)
             fig = px.line(data, x='date', y='close', title=f'${ticker} Stock Prices')
             graphJSON = fig.to_json()
-            return jsonify({"graph": graphJSON, "pct_change": pct_change, "name": name})
+            return jsonify({"graph": graphJSON,
+                            "pct_change": pct_change,
+                            "name": name,
+                            "ticker": ticker,
+                            "last_week_value": last_week_value})
         else:
             return jsonify({"error": "Stock ticker not found"})
     else:
@@ -60,6 +65,11 @@ def calculate_pct_change(df, ticker):
     pct_change = ((last_week_close - week_before_lastweek) / week_before_lastweek) * 100
     return pct_change
 
+
+def calculate_last_week(df, ticker):
+    ticker_data = df[df['ticker'] == ticker]
+    last_week_close = ticker_data.iloc[-1]['close']
+    return last_week_close
 
 if __name__ == "__main__":
     app.run(debug=True)
