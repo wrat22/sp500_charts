@@ -4,7 +4,6 @@ from flask import Flask, render_template, request, jsonify
 import plotly.express as px
 import pandas as pd
 import psycopg2
-from sqlalchemy import create_engine
 
 
 app = Flask(__name__)
