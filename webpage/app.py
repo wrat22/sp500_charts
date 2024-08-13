@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify
 import plotly.express as px
 import pandas as pd
+import psycopg2
+from sqlalchemy import create_engine
 
 
 app = Flask(__name__)
@@ -13,13 +15,25 @@ DB_PASSWORD = os.getenv('DBPASSWORD')
 DB_HOST = os.getenv('DBHOST')
 DB_PORT = os.getenv('DBPORT')
 DB_NAME = os.getenv('DBNAME')
-pandas_value_df = pd.read_sql(f"SELECT ticker, date, close FROM stock_prize", f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
-pandas_companies_df = pd.read_sql(f"SELECT ticker, name FROM companies", f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+
+try:
+    with psycopg2.connect(database=DB_NAME, user=DB_USER, password=DB_PASSWORD) as conn:
+        with conn.cursor() as cur:
+            sql = pd.read_sql_query("SELECT ticker, name FROM companies", conn)
+            pandas_companies_df = pd.DataFrame(sql, columns=["ticker", "name"])
+            sql2 = pd.read_sql_query("SELECT ticker, date, close FROM stock_prize", conn)
+            pandas_value_df = pd.DataFrame(sql2, columns=["ticker", "date", "close"])
+except psycopg2.Error as e:
+    print(f"Database error: {e}")
 
 
 @app.route('/')
 def index():
-    return render_template('index.html', stocks=list(pandas_companies_df['name'].unique()))
+    last_update = pandas_value_df['date'].max()
+
+    last_update_str = last_update.strftime('%Y-%m-%d')
+
+    return render_template('index.html', stocks=list(pandas_companies_df['name'].unique()), last_update=last_update_str)
 
 
 @app.route('/get_stock_data', methods=['POST'])

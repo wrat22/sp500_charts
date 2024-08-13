@@ -24,6 +24,9 @@
         <div id="pct-change" style="font-size: 20px; margin-bottom: 10px;"></div>
         <div id="chart"></div>
     </div>
+    <div id="last-update" style="margin-top: 20px;">
+        Last update: {{ last_update }}
+    </div>
     <script>
         $(document).ready(function(){
             $('#stock-search').on('input', function(){
