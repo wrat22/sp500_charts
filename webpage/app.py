@@ -1,4 +1,6 @@
 import os
+
+import numpy as np
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify
 import plotly.express as px
@@ -15,6 +17,9 @@ DB_HOST = os.getenv('DBHOST')
 DB_PORT = os.getenv('DBPORT')
 DB_NAME = os.getenv('DBNAME')
 
+pandas_companies_df = None
+pandas_value_df = None
+
 try:
     with psycopg2.connect(database=DB_NAME, user=DB_USER, password=DB_PASSWORD) as conn:
         with conn.cursor() as cur:
@@ -23,16 +28,22 @@ try:
             sql2 = pd.read_sql_query("SELECT ticker, date, close FROM stock_prize", conn)
             pandas_value_df = pd.DataFrame(sql2, columns=["ticker", "date", "close"])
 except psycopg2.Error as e:
-    print(f"Database error: {e}")
+    raise Exception(f"Database error: {e}")
 
 
 @app.route('/')
 def index():
-    last_update = pandas_value_df['date'].max()
+    try:
+        if pandas_value_df is None or pandas_companies_df is None:
+            raise Exception("Data could not be loaded from database.")
 
-    last_update_str = last_update.strftime('%Y-%m-%d')
+        last_update = pandas_value_df['date'].max()
+        last_update_str = last_update.strftime('%Y-%m-%d')
 
-    return render_template('index.html', stocks=list(pandas_companies_df['name'].unique()), last_update=last_update_str)
+        return render_template('index.html', stocks=list(pandas_companies_df['name'].unique()), last_update=last_update_str)
+    except Exception as e:
+        print(f"Database error: {str(e)}")
+        return jsonify({"Database error": str(e)}), 500
 
 
 @app.route('/get_stock_data', methods=['POST'])
@@ -45,6 +56,10 @@ def get_stock_data():
             data = pandas_value_df[pandas_value_df['ticker'] == ticker]
             pct_change = calculate_pct_change(pandas_value_df, ticker)
             last_week_value = calculate_last_week(pandas_value_df, ticker)
+
+            pct_change = float(pct_change)
+            last_week_value = int(last_week_value) if isinstance(last_week_value, np.integer) else last_week_value
+
             fig = px.line(data, x='date', y='close', title=f'${ticker} Stock Prices')
             graphJSON = fig.to_json()
             return jsonify({"graph": graphJSON,
