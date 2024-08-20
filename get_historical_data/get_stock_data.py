@@ -1,7 +1,9 @@
 import psycopg2
 from dotenv import load_dotenv
 import os
+import sys
 import yfinance as yf
+import pandas as pd
 
 
 def main():
@@ -13,7 +15,7 @@ def main():
 
     if not db_name or not db_user or not db_password:
         print("Database configuration environment variables are missing")
-        return
+        sys.exit(1)
 
     try:
         with psycopg2.connect(database=db_name, user=db_user, password=db_password) as conn:
