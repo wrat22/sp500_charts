@@ -17,12 +17,23 @@
             <option value="{{ stock }}">{{ stock }}</option>
         {% endfor %}
     </select>
+
     <button id="analyze-btn">Button (perform analysis)</button>
     <div id="analysis">
         <h2>Weekly Analysis</h2>
         <div id="name" style="font-size: 35px; margin-bottom: 5px"></div>
         <div id="pct-change" style="font-size: 20px; margin-bottom: 10px;"></div>
         <div id="chart"></div>
+
+        <div id="time-buttons" style="margin-top: 20px;">
+            <button class="time-range-btn" data-range="3months">3 Months</button>
+            <button class="time-range-btn" data-range="6months">6 Months</button>
+            <button class="time-range-btn" data-range="thisyear">This year</button>
+            <button class="time-range-btn" data-range="1year">1 Year</button>
+            <button class="time-range-btn" data-range="3year">3 Years</button>
+            <button class="time-range-btn" data-range="5year">5 Years</button>
+            <button class="time-range-btn" data-range="all">All time</button>
+        </div>
     </div>
     <div id="last-update" style="margin-top: 20px;">
         Last update: {{ last_update }}
@@ -49,9 +60,24 @@
                 }
             });
 
-            $('#analyze-btn').click(function(){
+             $('#analyze-btn').click(function(){
                 var ticker = $('#stock-list').val();
-                $.post('/get_stock_data', { ticker: ticker }, function(data){
+                var range = 'all';
+                fetchStockData(ticker, range);
+
+                $('#time-buttons').show();
+                $('#last-update').show();
+            });
+
+            $('.time-range-btn').click(function(){
+                var ticker = $('#stock-list').val();
+                var range = $(this).data('range');
+                fetchStockData(ticker, range);
+
+            });
+
+            function fetchStockData(ticker, range) {
+                $.post('/get_stock_data', { ticker: ticker, range: range }, function(data){
                     if (data.error) {
                         alert(data.error);
                     } else {
@@ -73,7 +99,7 @@
                         }
                     }
                 });
-            });
+            }
         });
     </script>
 </body>

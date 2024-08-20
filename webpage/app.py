@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, jsonify
 import plotly.express as px
 import pandas as pd
 import psycopg2
+from datetime import datetime, timedelta
 
 
 app = Flask(__name__)
@@ -49,11 +50,17 @@ def index():
 @app.route('/get_stock_data', methods=['POST'])
 def get_stock_data():
     name = request.form['ticker']
+    range_option = request.form['range']
+
     matching_rows = pandas_companies_df.loc[pandas_companies_df['name'] == name, 'ticker']
+
     if not matching_rows.empty:
         ticker = matching_rows.iloc[0]
+
         if ticker in pandas_value_df['ticker'].unique():
-            data = pandas_value_df[pandas_value_df['ticker'] == ticker]
+            data = pandas_value_df[pandas_value_df['ticker'] == ticker].copy()
+            data = filter_by_range(data, range_option)
+            data = data.sort_values(by='date')
             pct_change = calculate_pct_change(pandas_value_df, ticker)
             last_week_value = calculate_last_week(pandas_value_df, ticker)
 
@@ -85,6 +92,31 @@ def calculate_last_week(df, ticker):
     ticker_data = df[df['ticker'] == ticker]
     last_week_close = ticker_data.iloc[-1]['close']
     return last_week_close
+
+
+def filter_by_range(data, range_option):
+    today = datetime.today()
+
+    if range_option == '3months':
+        start_date = today - timedelta(days=90)
+    elif range_option == '6months':
+        start_date = today - timedelta(days=180)
+    elif range_option == 'thisyear':
+        start_date = datetime(today.year, 1, 1)
+    elif range_option == '1year':
+        start_date = today - timedelta(days=365)
+    elif range_option == '3year':
+        start_date = today - timedelta(days=1095)
+    elif range_option == '5year':
+        start_date = today - timedelta(days=1825)
+    else:
+        return data
+
+    data['date'] = pd.to_datetime(data['date'])
+    filtered_data = data[data['date'] >= start_date]
+
+    return filtered_data
+
 
 if __name__ == "__main__":
     app.run(debug=True)
