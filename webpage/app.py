@@ -4,6 +4,7 @@ import numpy as np
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 import psycopg2
 from datetime import datetime, timedelta
@@ -69,6 +70,9 @@ def get_stock_data():
 
             fig = px.line(data, x='date', y='close', title=f'${ticker} Stock Prices')
             graphJSON = fig.to_json()
+
+            stored_first_data = data
+
             return jsonify({"graph": graphJSON,
                             "pct_change": pct_change,
                             "name": name,
@@ -78,6 +82,44 @@ def get_stock_data():
             return jsonify({"error": "Stock ticker not found"})
     else:
         return jsonify({"error": "Company name not found"})
+
+
+@app.route('/compare_stocks', methods=['POST'])
+def compare_stocks():
+    first_ticker = request.form['first_ticker']
+    second_ticker = request.form['second_ticker']
+    range_option = request.form['range']
+
+    if 'stored_first_date' in globals() and stored_first_data is not None:
+        first_data = stored_first_data
+    else:
+        matching_first_rows = pandas_companies_df.loc[pandas_companies_df['name'] == first_ticker, 'ticker']
+        if not matching_first_rows.empty:
+            first_ticker_symbol = matching_first_rows.iloc[0]
+            first_data = pandas_value_df[pandas_value_df['ticker'] == first_ticker_symbol].copy()
+            first_data = filter_by_range(first_data, range_option)
+            first_data = first_data.sort_values(by='date')
+        else:
+            return jsonify({"error": "First company name not found"})
+
+    matching_second_rows = pandas_companies_df.loc[pandas_companies_df['name'] == second_ticker, 'ticker']
+    if not matching_second_rows.empty:
+        second_ticker_symbol = matching_second_rows.iloc[0]
+        second_data = pandas_value_df[pandas_value_df['ticker'] == second_ticker_symbol].copy()
+        second_data = filter_by_range(second_data, range_option)
+        second_data = second_data.sort_values(by='date')
+    else:
+        return jsonify({"error": "Second company name not found"})
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=first_data['date'], y=first_data['close'], mode='lines', name=first_ticker, line=dict(color='blue')))
+    fig.add_trace(go.Scatter(x=second_data['date'], y=second_data['close'], mode='lines', name=second_ticker, line=dict(color='red')))
+
+    fig.update_layout(title=f'{first_ticker} vs {second_ticker} Stock Prizes', xaxis_title='Date', yaxis_title='Price')
+
+    graphJSON = fig.to_json()
+
+    return jsonify({'graph': graphJSON})
 
 
 def calculate_pct_change(df, ticker):
