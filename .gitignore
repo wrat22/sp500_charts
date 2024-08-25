@@ -9,4 +9,5 @@ airflow_get_data/data
 airflow_get_data/logs
 airflow_get_data/sp500
 webpage/.env
+webpage/__pycache__/app.cpython-311.pyc
 webpage/__pycache__/*.pyc
