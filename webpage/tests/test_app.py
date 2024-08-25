@@ -135,11 +135,11 @@ def test_get_stock_data_long_ticker(client):
 
 def test_json_structure(client, mocker, sample_data):
     mocker.patch(
-        "models.get_stock_companies_from_db", return_value=pd.DataFrame(
+        "routes.get_stock_companies_from_db", return_value=pd.DataFrame(
             {"ticker": ["AAPL", "GOOGL"], "name": ["Apple Inc.", "Google"]}
         )
     )
-    mocker.patch("models.get_stock_values_from_db", return_value=sample_data)
+    mocker.patch("routes.get_stock_values_from_db", return_value=sample_data)
 
     response = client.post("get_stock_data", data={"ticker": "Apple Inc.", "range": "all"})
     json_data = response.get_json()
