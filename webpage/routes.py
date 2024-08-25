@@ -58,7 +58,7 @@ def get_stock_data():
         - 'ticker' (str): the name of the company for which stock is requested.
         - 'range' (str): the data range for filtering the stock data.
     :return:
-        Response: A Flask 'Response' object that renders the 'index.html' template with the:
+        Response: A Flask 'Response' object with a JSON payload containing:
             - 'graph' (str): A JSON string representation of the line chart of stock prices.
             - 'pct-change' (float): the percentage change in stock price.
             - 'name' (str): the company name provided in the request.
@@ -124,7 +124,7 @@ def compare_stocks():
         - 'second_ticker' (str): the name of the second company to compare
         - 'range' (str): the data range for filtering the stock data.
     :return:
-        Response: A Flask 'Response' object that renders the 'index.html' template with the:
+        Response: A Flask 'Response' object with a JSON payload containing:
             - 'graph' (str): A JSON string representation of the line chart of stock prices.
     """
     first_ticker = request.form["first_ticker"]
