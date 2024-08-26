@@ -104,7 +104,6 @@ def get_stock_data():
         if ticker in pandas_value_df["ticker"].unique():
             data = pandas_value_df[pandas_value_df["ticker"] == ticker].copy()
             data = filter_by_range(data, range_option)
-            #data = data.sort_values(by="date")
             pct_change = calculate_pct_change(pandas_value_df, ticker)
             last_week_value = calculate_last_week(pandas_value_df, ticker)
 
