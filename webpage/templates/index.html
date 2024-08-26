@@ -136,6 +136,19 @@
                     } else {
                         var graphDiv = document.getElementById('chart');
                         Plotly.newPlot(graphDiv, JSON.parse(data.graph).data, JSON.parse(data.graph).layout);
+
+                        var name = data.name;
+                        var nameDiv = document.getElementById('name');
+                        nameDiv.innerHTML = `Stock name: ${name}`;
+
+                        var pctChange = data.pct_change.toFixed(2);
+                        var pctChangeDiv = document.getElementById('pct-change');
+
+                        if (pctChange >= 0) {
+                            pctChangeDiv.innerHTML = `Last week: <span style="color:green;">+${pctChange}%</span>`;
+                        } else {
+                            pctChangeDiv.innerHTML = `Last week: <span style="color:red;">${pctChange}%</span>`;
+                        }
                     }
                 });
             }
