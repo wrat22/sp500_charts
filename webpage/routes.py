@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, current_app as app
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -10,8 +10,31 @@ from models import (
     get_stock_companies_from_db,
     get_last_update_from_db,
 )
+from extensions import cache
 
 main_routes = Blueprint("main_routes", __name__)
+
+
+def get_cached_stock_companies():
+    cache_key = 'companies_data'
+
+    cached_data = cache.get(cache_key)
+    if cached_data is None:
+        cached_data = get_stock_companies_from_db()
+        cache.set(cache_key, cached_data, timeout=60)
+
+    return cached_data
+
+
+def get_cached_stock_values():
+    cache_key = 'values_data'
+
+    cached_data = cache.get(cache_key)
+    if cached_data is None:
+        cached_data = get_stock_values_from_db()
+        cache.set(cache_key, cached_data, timeout=60)
+
+    return cached_data
 
 
 @main_routes.route("/")
@@ -27,7 +50,7 @@ def index():
             - 'stocks' (list of str): List of unique stock company names.
             - 'last_update' (str): The date of the last update in 'YYYY-MM-DD' format.
     """
-    pandas_companies_df = get_stock_companies_from_db()
+    pandas_companies_df = get_cached_stock_companies()
 
     try:
         if pandas_companies_df is None:
@@ -68,8 +91,8 @@ def get_stock_data():
     name = request.form["ticker"]
     range_option = request.form["range"]
 
-    pandas_companies_df = get_stock_companies_from_db()
-    pandas_value_df = get_stock_values_from_db()
+    pandas_companies_df = get_cached_stock_companies()
+    pandas_value_df = get_cached_stock_values()
 
     matching_rows = pandas_companies_df.loc[
         pandas_companies_df["name"] == name, "ticker"
@@ -131,8 +154,8 @@ def compare_stocks():
     second_ticker = request.form["second_ticker"]
     range_option = request.form["range"]
 
-    pandas_companies_df = get_stock_companies_from_db()
-    pandas_value_df = get_stock_values_from_db()
+    pandas_companies_df = get_cached_stock_companies()
+    pandas_value_df = get_cached_stock_values()
 
     if "stored_first_date" in globals() and stored_first_data is not None:
         first_data = stored_first_data
