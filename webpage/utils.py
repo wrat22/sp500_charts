@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import pandas as pd
-
+import numpy as np
 
 def filter_by_range(data, range_option):
     """
@@ -35,24 +35,26 @@ def filter_by_range(data, range_option):
     return filtered_data
 
 
-def calculate_pct_change(df, ticker):
+def calculate_pct_change_for_range(data, ticker):
     """
-    Calculates change in prize stocks between weeks
+        Calculates change in prize stocks between weeks
 
-    :parameter:
-        - df (pandas.DataFrame): A DataFrame containing stock data.
-        - ticker (str): A company symbol for which change is calculated.
-    :return:
-        - pct_change: (float): the percentage change in stock prices.
-    """
-    ticker_data = df[df["ticker"] == ticker]
-    last_week_close = ticker_data.iloc[-1]["close"]
-    week_before_lastweek = ticker_data.iloc[-2]["close"]
-    pct_change = ((last_week_close - week_before_lastweek) / week_before_lastweek) * 100
-    return pct_change
+        :parameter:
+            - df (pandas.DataFrame): A DataFrame containing stock data.
+            - ticker (str): A company symbol for which change is calculated.
+        :return:
+            - pct_change: (float): the percentage change in stock prices.
+        """
+    ticker_data = data[data["ticker"] == ticker]
+    if len(data) >= 2:
+        last_close = ticker_data.iloc[-1]['close']
+        first_close = ticker_data.iloc[0]['close']
+        pct_change = ((last_close - first_close) / first_close) * 100
+        return float(pct_change)
+    return 0
 
 
-def calculate_last_week(df, ticker):
+def calculate_last_change(df, ticker):
     """
     Returns last week close value in stock prices for specified company.
 
@@ -63,5 +65,25 @@ def calculate_last_week(df, ticker):
         - last_week_close: (int): the stock value of last week.
     """
     ticker_data = df[df["ticker"] == ticker]
-    last_week_close = ticker_data.iloc[-1]["close"]
-    return last_week_close
+    if len(df) >= 2:
+        last_close = ticker_data.iloc[-1]["close"]
+        first_close = ticker_data.iloc[0]["close"]
+        close_change = last_close - first_close
+        close_change = (
+            int(close_change)
+            if isinstance(close_change, np.integer)
+            else close_change
+        )
+        return close_change
+    return 0
+
+
+def get_value(df, ticker):
+    ticker_data = df[df["ticker"] == ticker]
+    last_close = ticker_data.iloc[-1]["close"]
+    last_close = (
+        int(last_close)
+        if isinstance(last_close, np.integer)
+        else last_close
+    )
+    return last_close
