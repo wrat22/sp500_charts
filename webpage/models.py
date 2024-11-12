@@ -27,7 +27,7 @@ def get_stock_values_from_db():
         If error occurs while loading data, the function returns None
     """
     df = None
-    query = "SELECT ticker, date, close FROM stock_prize"
+    query = "SELECT ticker, date, close FROM stock_prize ORDER BY date ASC"
     try:
         with engine.connect() as conn:
             df = pd.read_sql(sql=query, con=conn.connection)
