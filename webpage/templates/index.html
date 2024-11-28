@@ -10,25 +10,28 @@
 </head>
 <body>
     <h1>S&P500 Stocks Analysis</h1>
-    <label for="stock-search">Choose stock:</label>
-    <input type="text" id="stock-search" placeholder="Search bar">
-    <select id="stock-list">
-        {% for stock in stocks %}
-            <option value="{{ stock }}">{{ stock }}</option>
-        {% endfor %}
-    </select>
+    <div>
+        <label for="stock-search">Choose stock:</label>
+        <input type="text" id="stock-search" placeholder="Search bar">
+        <select id="stock-list">
+            {% for stock in stocks %}
+                <option value="{{ stock }}">{{ stock }}</option>
+            {% endfor %}
+        </select>
 
-    <button id="analyze-btn">Perform analysis</button>
+        <button id="analyze-btn">Perform analysis</button>
+    </div>
+    <div>
+        <label for="stock-search-compare">Choose second stock for comparison</label>
+        <input type="text" id="stock-search-compare" placeholder="Search bar">
+        <select id="stock-list-compare">
+            {% for stock in stocks %}
+                <option value="{{ stock }}">{{ stock }}</option>
+            {% endfor %}
+        </select>
 
-    <label for="stock-search-compare">Choose second stock for comparison</label>
-    <input type="text" id="stock-search-compare" placeholder="Search bar">
-    <select id="stock-list-compare">
-        {% for stock in stocks %}
-            <option value="{{ stock }}">{{ stock }}</option>
-        {% endfor %}
-    </select>
-
-    <button id="compare-btn" style="display: none;">Compare stocks</button>
+        <button id="compare-btn">Compare stocks</button>
+    </div>
     <div class="stock-data-container">
         <div id="analysis" class="stock-data">
             <h2>First stock analysis</h2>
@@ -62,6 +65,16 @@
     <script>
         $(document).ready(function(){
             var isComparing = false;
+
+            function toggleVisibility(isVisible) {
+                if (isVisible) {
+                    $('#chart, #analysis, #time-buttons, #last-update').show();
+                } else {
+                    $('#chart, #analysis, #comparison-analysis, #time-buttons, #last-update').hide();
+                }
+            }
+
+            toggleVisibility(false);
 
             $('#stock-search').on('input', function(){
                 var inputValue = $(this).val().toLowerCase();
@@ -106,25 +119,26 @@
              $('#analyze-btn').click(function(){
                 var ticker = $('#stock-list').val();
                 var range = 'all';
-
-                fetchStockData(ticker, range);
-
-                $('#time-buttons').show();
-                $('#last-update').show();
-                $('#compare-btn').show();
-
-                isComparing = false;
+                if (ticker) {
+                    fetchStockData(ticker, range);
+                    toggleVisibility(true);
+                    isComparing = false;
+                } else {
+                    alert("Please select a stock to analyze.");
+                }
             });
             $('#compare-btn').click(function(){
                 var firstTicker = $('#stock-list').val();
                 var secondTicker = $('#stock-list-compare').val();
                 var range = 'all';
 
-                if (secondTicker) {
+                if (firstTicker && secondTicker) {
                     fetchComparisonData(firstTicker, secondTicker, range);
+                    toggleVisibility(true);
+                    $('#comparison-analysis').show();
                     isComparing = true;
                 } else {
-                    alert("Please select a second stock for comparison.");
+                    alert("Please select both stocks for comparison.");
                 }
             });
 
