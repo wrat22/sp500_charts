@@ -34,13 +34,11 @@
     </div>
     <div class="stock-data-container">
         <div id="analysis" class="stock-data">
-            <h2>First stock analysis</h2>
             <div id="name" style="font-size: 35px; margin-bottom: 5px"></div>
             <div id="last-value" style="font-size: 20px; margin-bottom: 10px"></div>
             <div id="pct-change" style="font-size: 20px; margin-bottom: 10px;"></div>
         </div>
         <div id="comparison-analysis" class="stock-data">
-            <h2>Second stock analysis</h2>
             <div id="comparison-name" style="font-size: 35px; margin-bottom: 5px"></div>
             <div id="comparison-last-value" style="font-size: 20px; margin-bottom: 10px"></div>
             <div id="comparison-pct-change" style="font-size: 20px; margin-bottom: 10px;"></div>
@@ -163,7 +161,7 @@
 
                         var name = data.name;
                         var nameDiv = document.getElementById('name');
-                        nameDiv.innerHTML = `Stock name: ${name}`;
+                        nameDiv.innerHTML = `$${name}`;
 
                         var pctChange = data.pct_change.toFixed(2);
                         var pctChangeDiv = document.getElementById('pct-change');
@@ -217,7 +215,7 @@
                         Plotly.newPlot(graphDiv, JSON.parse(data.graph).data, JSON.parse(data.graph).layout);
 
                         // First Stock Data
-                        $('#name').html(`Stock name: ${data.first_stock.name}`);
+                        $('#name').html(`$${data.first_stock.name}`);
 
                         var pctChangeValue1 = parseFloat(data.first_stock.pct_change).toFixed(2);
 
@@ -232,7 +230,7 @@
                             $('#pct-change').html(`${rangeText}: ${lastChange1} <span style="color:red;">(${pctChangeValue1}%)</span>`);
                         }
                         // Second Stock Data
-                        $('#comparison-name').html(`Stock name: ${data.second_stock.name}`);
+                        $('#comparison-name').html(`$${data.second_stock.name}`);
 
                         var pctChangeValue2 = parseFloat(data.second_stock.pct_change).toFixed(2);
 
