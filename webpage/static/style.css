@@ -101,6 +101,21 @@ button:hover {
     border-radius: 8px;
 }
 
+.stock-selection-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.stock-selection-container div:last-child {
+    margin-right: 0;
+}
+
+#chart, #analysis, #comparison-analysis, #time-buttons, #last-update {
+    display: none;
+}
+
 @media (max-width: 768px) {
     .stock-data-container {
         flex-direction: column;
@@ -108,5 +123,17 @@ button:hover {
 
     .stock-data, #analysis, #comparison-analysis {
         width: 100%;
+    }
+
+    .stock-selection-container {
+        flex-direction: column;
+    }
+
+    .stock-selection-container div {
+        margin-bottom: 15px;
+    }
+
+    .stock-selection-container div:last-child {
+        margin-bottom: 0;
     }
 }
