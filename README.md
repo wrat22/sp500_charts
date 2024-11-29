@@ -13,3 +13,4 @@ Application is used to gather information and simply compare stocks based on the
 
 ## Sample visualization
 
+![S P500 showcase](https://github.com/user-attachments/assets/0ff35384-f9c2-440c-a327-2bba6cab707c)
